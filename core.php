@@ -133,8 +133,9 @@ final class Helium {
 		require_once HELIUM_PATH . '/' . $helium_component . '.php';
 	}
 
-	// Locate where a class might be defined by checking for 'Controller', 'Helper', etc.
-	public static function load_class_file($class_name) {
+	// Load the definition of a class by searching appropriate directories
+	// Used for __autoload();
+	public static function load_class_file($class_name, $extend_search = true) {
 		if ($class_name == 'Inflector') {
 			self::load_helium_file('inflector');
 			return;
@@ -157,31 +158,41 @@ final class Helium {
 			case 'helper':
 				// there can only be one instance of a controller, component, or helper at a time.
 				// thus, we can use Helium::factory() instead.
-				$name = substr($filename, $last_underscore);
-				return (bool) self::factory($last_word, $filename);
+				$dir = Inflector::pluralize($last_word);
+				$success = self::load_app_file($dir, $filename);
+				if (!$extend_search)
+					break;
 			default:
-				$success = self::load_app_file('models', $filename);
+				foreach ($search as $dir) {
+					$success = self::load_app_file($dir, $filename);
+					if ($success)
+						break;
+				}
 		}
 
 		return $success;
 	}
 
-	// factory for app objects
+	// Generate an instance of an app class and throw an appropriate exception if it is not found.
+	// This is different to just __autoload()ing which only throws a no_class exception.
 	public static function factory($type, $name) {
 		$joined = $name . '_' . $type;
 
 		if ($object = self::$factory_cache[$joined])
 			return $object;
 
+		$class_name = Inflector::camelize($joined);
 		$directory = Inflector::pluralize($type);
 
-		// load the class definition file. if it doesn't exist, throw exception
-		if (!self::load_app_file($directory, $joined))
+		// the second parameter is whether or not we should look for the class in other directories.
+		// in this case, we shouldn't.
+		$try = self::load_class_file($class_name, false);
+
+		// If the class isn't defined anywhere it may be, then throw an exception
+		if (!$try)
 			throw new HeliumException(constant('HeliumException::no_' . $type), $name);
 
-		$class_name = Inflector::camelize($joined);
-
-		$object = self::$factory_cache[$name] = new $class_name;
+		$object = self::$factory_cache[$joined] = new $class_name;
 
 		return $object;
 	}
