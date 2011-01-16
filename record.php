@@ -69,6 +69,9 @@ abstract class HeliumRecord extends HeliumRecordSupport {
 		$this->rebuild();
 	}
 
+	// called before destroy().
+	public function before_destroy() {}
+
 	/* finding functions
 	   functions for and related to fetching records from the DB */
 
@@ -291,8 +294,9 @@ abstract class HeliumRecord extends HeliumRecordSupport {
 		return true;
 	}
 
-	// to extend in child classes, call parent::destroy();
 	public function destroy() {
+		$this->before_destroy();
+
 		$db = Helium::db();
 
 		$table = $this->_table_name;
