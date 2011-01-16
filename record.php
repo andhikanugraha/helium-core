@@ -30,7 +30,7 @@ abstract class HeliumRecord extends HeliumRecordSupport {
 	public $_columns = array();
 	public $_column_types = array();
 
-	public function __construct() {
+	public function __construct($default = true) {
 		$class_name = get_class($this);
 
 		if (!$this->_table_name) {
@@ -42,6 +42,9 @@ abstract class HeliumRecord extends HeliumRecordSupport {
 		$this->_model = $model;
 
 		$this->init();
+
+		if ($default)
+			$this->defaults();
 	}
 
 	/* blank methods

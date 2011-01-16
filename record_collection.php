@@ -284,7 +284,7 @@ class HeliumRecordCollection extends HeliumRecordSupport implements Iterator {
 
 	private function prepare_record($row) {
 		$class_name = $this->class_name;
-		$record = new $class_name;
+		$record = new $class_name(false);
 
 		foreach ($this->col_types as $name => $type) {
 			$raw_value = $row->$name;
