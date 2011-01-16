@@ -56,4 +56,18 @@ class HeliumDateTime extends DateTime {
 				return $this->setTime($this->hour, $this->minute, $value);
 		}
 	}
+
+	public function later_than($date = 'now') {
+		if (is_string($date))
+			$date = new HeliumDateTime($date);
+
+		return ($this > $date);
+	}
+
+	public function earlier_than($date = 'now') {
+		if (is_string($date))
+			$date = new HeliumDateTime($date);
+
+		return ($this < $date);
+	}
 }
