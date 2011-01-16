@@ -296,6 +296,7 @@ class HeliumRecordCollection extends HeliumRecordSupport implements Iterator {
 		$record->_associate = $this->_associate;
 		$record->_exists = true;
 		$record->rebuild();
+		$record->_unserialize_auto();
 
 		return $record;
 	}

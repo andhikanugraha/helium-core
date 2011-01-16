@@ -238,11 +238,11 @@ abstract class HeliumRecord extends HeliumRecordSupport {
 	// manipulation functions
 
 	public function save() {
+		$this->before_save();
+
 		$db = Helium::db();
 
 		$table = $this->_table_name;
-
-		$this->before_save();
 
 		if ($this->exists()) {
 			$query = array();
@@ -324,6 +324,9 @@ abstract class HeliumRecord extends HeliumRecordSupport {
 		foreach ($this->_column_types as $field => $type) {
 			$value = $this->$field;
 
+			if (in_array($field, $this->_auto_serialize))
+				$value = serialize($value);
+
 			switch ($type) {
 				case 'bool':
 					$value = $value ? 1 : 0;
@@ -331,13 +334,26 @@ abstract class HeliumRecord extends HeliumRecordSupport {
 				case 'datetime':
 					$value = $value->mysql_datetime();
 			}
-			
+
 			$value = (string) $value;
 			$value = $db->escape($value);
 			$fields[$field] = $value;
 		}
 
 		return $fields;
+	}
+
+	// auto serialize - call this and a property will be automatically serialized and unserialized on save() and find().
+	
+	protected function auto_serialize() {
+		$properties = func_get_args();
+		$this->_auto_serialize = array_merge($this->_auto_serialize(), $properties);
+	}
+	
+	public function _unserialize_auto() {
+		array_walk($this->_auto_serialize, function($property) {
+			$this->$property = unserialize($this->$property);
+		});
 	}
 
 	// other functions
