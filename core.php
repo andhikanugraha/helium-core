@@ -142,9 +142,13 @@ final class Helium {
 		}
 
 		if (strtolower(substr($class_name, 0, 6)) == 'helium') {
-			$helium_component = substr($class_name, 6);
-			$filename = Inflector::underscore($helium_component);
-			self::load_helium_file($filename);
+			if ($class_name == 'HeliumConfiguration')
+				self::conf();
+			else {
+				$helium_component = substr($class_name, 6);
+				$filename = Inflector::underscore($helium_component);
+				self::load_helium_file($filename);
+			}
 			return;
 		}
 
