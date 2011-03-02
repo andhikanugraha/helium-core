@@ -111,6 +111,13 @@ abstract class HeliumController implements ArrayAccess {
 		if (is_callable($function))
 			return call_user_func_array($function, $arguments);
 	}
+	
+	public function _alias_method($name, $callback) {
+		$this->$name = function() use ($callback) {
+			$args = func_get_args();
+			call_user_func_args($callback, $args);
+		};
+	}
 
 	// if you want an action called 'render', then call parent::render() instead of $this->render.
 	protected function render($view = '') {
