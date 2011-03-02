@@ -51,10 +51,9 @@ class HeliumDefaults {
 		// define class constants for convenience
 		$this_class_name = get_class($this);
 		foreach (get_object_vars($this) as $var => $value) {
-			if (is_scalar($value)) {
-				$constant_name = $this_class_name . '::' . $var;
+			$constant_name = $this_class_name . '::' . $var;
+			if (is_scalar($value) && !defined($constant_name))
 				define($constant_name, $value);
-			}
 		}
 	}
 }
