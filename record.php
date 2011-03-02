@@ -376,23 +376,41 @@ abstract class HeliumRecord extends HeliumRecordSupport {
 		return true;
 	}
 
-	public function link($class) {
-		$class_name = get_class($class);
-		$single_name = Inflector::underscore($class_name);
-		$field = $this->_associations['one-to-one'][$single_name];
+	public function associate($associate) {
+		$associate_class = get_class($associate);
 
-		if (!$field)
-			return false;
-
-		if ($this->$field != $class->id)
-			$this->$field = $class->id;
-
-		if (get_class($this->$single_name) == $class_name && $this->$single_name->id == $class->id)
-			$this->$single_name->merge($class);
-		else
-			$this->$single_name = $class;
-
-		return true;
+		foreach ($this->_associations as $type => $associations) {
+			foreach ($associations as $association) {
+				if ($association['class_name'] == $associate_class) {
+					$foreign_key = $association['foreign_key'];
+					switch ($type) {
+						case 'one-to-one':
+							if ($association['_type'] == 'has_one') {
+								$associate->$foreign_key = $this->id;
+								$associate->save();
+								$this->_associate = $associate;
+							}
+							else {
+								$this->$foreign_key = $associate->id;
+								$this->save();
+								$associate->_associate = $this;
+							}
+							break;
+						case 'one-to-many':
+							$associate->$foreign_key = $this->id;
+							$associate->save();
+							$associate->_associate = $this;
+							break;
+						case 'many-to-many':
+							$db = Helium::db();
+							extract($association);
+							$query = "INSERT INTO `$join_table` (`$foreign_key`, `$association_foreign_key`) VALUES ('{$associate->id}', '{$this->id}')";
+							return $db->query($query);
+							break;
+					}
+				}
+			}
+		}
 	}
 
 	public function disassociate() {
