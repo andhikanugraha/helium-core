@@ -222,6 +222,18 @@ abstract class HeliumRecord extends HeliumRecordSupport {
 			return null;
 	}
 
+	final public function __set($association_id, $value) {
+		if ($this->_associations['one-to-one'][$association_id] ||
+			$this->_associations['one-to-many'][$association_id] ||
+			$this->_associations['many-to-many'][$association_id])
+			{
+			$this->associate($value, $association_id);
+			return $this->$association_id;
+		}
+		else
+			return null;
+	}
+
 	final public function __isset($name) {
 		return ($this->_associations['one-to-one'][$name] || 
 				$this->_associations['one-to-many'][$name] ||
@@ -376,12 +388,13 @@ abstract class HeliumRecord extends HeliumRecordSupport {
 		return true;
 	}
 
-	public function associate($associate) {
+	public function associate($associate, $match_association_id = '') {
 		$associate_class = get_class($associate);
 
 		foreach ($this->_associations as $type => $associations) {
-			foreach ($associations as $association) {
-				if ($association['class_name'] == $associate_class) {
+			foreach ($associations as $association_id => $association) {
+				$check_association_id = $match_association_id ? ($association_id == $match_association_id) : true;
+				if ($association['class_name'] == $associate_class && $check_association_id) {
 					$foreign_key = $association['foreign_key'];
 					switch ($type) {
 						case 'one-to-one':
