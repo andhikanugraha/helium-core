@@ -45,8 +45,55 @@ abstract class HeliumRecord extends HeliumRecordSupport {
 
 		$this->init();
 
-		if ($default)
+		if ($default) {
+			// fetch column types
+			$db = Helium::db();
+			$table = $this->_table_name;
+			$query = $db->get_results("SHOW COLUMNS FROM `$table`");
+
+			$columns = array();
+			foreach ($query as $row) {
+				$field = $row->Field;
+				$type = $row->Type;
+
+				$pos = strpos($type, '(');
+				if ($pos > 0)
+					$type = substr($type, 0, $pos);
+				
+				$type = strtolower($type);
+				switch ($type) {
+					case 'tinyint':
+						if ($length == 1)
+							$type = 'bool';
+					case 'smallint':
+					case 'int':
+					case 'mediumint':
+					case 'bigint':
+						$type = 'int';
+						break;
+					case 'float':
+					case 'double':
+					case 'decimal':
+						$type = 'float';
+						break;
+					case 'date':
+					case 'time':
+					case 'datetime':
+					case 'timestamp':
+					case 'year':
+						$type = 'datetime';
+						break;
+					// to do: support the other column types (BLOB, etc)
+					default:
+						$type = 'string';
+				}
+
+				$this->_column_types[$field] = $type;
+			}
+
+			$this->_columns = $columns;
 			$this->defaults();
+		}
 	}
 
 	/* blank methods
