@@ -30,6 +30,8 @@ abstract class HeliumRecord extends HeliumRecordSupport {
 	public $_columns = array();
 	public $_column_types = array();
 
+	public $_auto_serialize = array();
+
 	public function __construct($default = true) {
 		$class_name = get_class($this);
 
