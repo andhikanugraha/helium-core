@@ -156,8 +156,8 @@ final class Helium {
 		}
 
 		$filename = Inflector::underscore($class_name);
-		$last_underscore = strrpos('_', $filename);
-		$last_word = substr($underscored, $last_underscore + 1);
+		$last_underscore = strrpos($filename, '_');
+		$last_word = substr($filename, $last_underscore + 1);
 
 		switch($last_word) {
 			case 'controller':
