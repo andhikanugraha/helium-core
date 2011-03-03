@@ -35,7 +35,7 @@ class HeliumDefaults {
 		if (!$this->db_name && $this->db_user)
 			$this->db_name = $this->db_user;
 
-		$app_dirs = array('models', 'views', 'controllers', 'components', 'helpers');
+		$app_dirs = array('models', 'views', 'controllers', 'components', 'helpers', 'includes');
 		foreach ($app_dirs as $dir) {
 			$conf = $dir . '_path';
 			$defined = $this->$conf;
