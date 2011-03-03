@@ -40,6 +40,9 @@ final class Helium {
 		if ($initiated)
 			return;
 
+		// fetch the config
+		self::conf();
+
 		// reset the router
 		self::$router = new HeliumRouter;
 
@@ -167,6 +170,7 @@ final class Helium {
 				if (!$extend_search)
 					break;
 			default:
+				$search = array('models', 'includes');
 				foreach ($search as $dir) {
 					$success = self::load_app_file($dir, $filename);
 					if ($success)
