@@ -80,7 +80,7 @@ class HeliumRecordCollection extends HeliumRecordSupport implements Iterator {
 
 	private function get_model_table($class_name = '') {
 		if (class_exists($class_name)) {
-			$prototype = new $class_name;
+			$prototype = new $class_name(false);
 
 			return $prototype->_table_name;
 		}

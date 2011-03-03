@@ -153,7 +153,7 @@ abstract class HeliumRecord extends HeliumRecordSupport {
 			$conditions = array();
 
 		$_type = 'has_one';
-		$this->_associations['one-to-one'][$model_name] = compact($_type, $foreign_key, $class_name, $conditions);
+		$this->_associations['one-to-one'][$model_name] = compact('_type', 'foreign_key', 'class_name', 'conditions');
 	}
 
 	final protected function belongs_to($association_id, $options = array()) {
@@ -166,7 +166,7 @@ abstract class HeliumRecord extends HeliumRecordSupport {
 			$conditions = array();
 		
 		$_type = 'belongs_to';
-		$this->_associations['one-to-one'][$association_id] = compact($_type, $foreign_key, $class_name, $conditions);
+		$this->_associations['one-to-one'][$association_id] = compact('_type', 'foreign_key', 'class_name', 'conditions');
 	}
 
 	final protected function has_many($association_id, $options) {
@@ -178,7 +178,7 @@ abstract class HeliumRecord extends HeliumRecordSupport {
 		if (!$conditions)
 			$conditions = array();
 
-		$this->_associations['one-to-many'][$association_id] = compact($foreign_key, $class_name, $conditions);
+		$this->_associations['one-to-many'][$association_id] = compact('foreign_key', 'class_name', 'conditions');
 	}
 
 	// the other class must also declare has_and_belongs_to_many
@@ -199,7 +199,7 @@ abstract class HeliumRecord extends HeliumRecordSupport {
 		if (!$conditions)
 			$conditions = array();
 
-		$this->_associations['many-to-many'][$association_id] = compact($class_name, $join_table, $foreign_key, $association_foreign_key, $conditions);
+		$this->_associations['many-to-many'][$association_id] = compact('class_name', 'join_table', 'foreign_key', 'association_foreign_key', 'conditions');
 	}
 
 	// internal mapping functions for associations
@@ -412,8 +412,9 @@ abstract class HeliumRecord extends HeliumRecordSupport {
 	}
 	
 	public function _unserialize_auto() {
-		array_walk($this->_auto_serialize, function($property) {
-			$this->$property = unserialize($this->$property);
+		$obj = $this;
+		array_walk($this->_auto_serialize, function($property) use ($obj) {
+			$obj->$property = unserialize($obj->$property);
 		});
 	}
 
