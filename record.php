@@ -104,6 +104,8 @@ abstract class HeliumRecord extends HeliumRecordSupport {
 	// everything else that should be called during __construction should also be called here.
 	public function init() {}
 
+	public function defaults() {}
+
 	// rebuild, called:
 	// after a record is fetched from the database
 	// after a record is saved (if after_save is not redefined)

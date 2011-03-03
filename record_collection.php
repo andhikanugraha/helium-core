@@ -66,7 +66,7 @@ class HeliumRecordCollection extends HeliumRecordSupport implements Iterator {
 			extract($options);
 			$foreign_table = $this->get_model_table($class_name);
 			if ($foreign_table) {
-				$join_condition = "`$foreign_table`.`id`=`$local_table`.`$local_key`";
+				$join_condition = "`$foreign_table`.`id`=`$local_table`.`$foreign_key`";
 				$this->join_statements[] = sprintf($base_join_statement, $foreign_table, $join_condition);
 			}
 		}
