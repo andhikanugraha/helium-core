@@ -359,7 +359,7 @@ abstract class HeliumRecord extends HeliumRecordSupport {
 	
 	protected function auto_serialize() {
 		$properties = func_get_args();
-		$this->_auto_serialize = array_merge($this->_auto_serialize(), $properties);
+		$this->_auto_serialize = array_merge($this->_auto_serialize, $properties);
 	}
 	
 	public function _unserialize_auto() {
