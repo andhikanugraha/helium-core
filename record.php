@@ -145,7 +145,7 @@ abstract class HeliumRecord extends HeliumRecordSupport {
 
 	// associational functions
 
-	final protected function has_one($model_name, $options = array()) {
+	final protected function has_one($association_id, $options = array()) {
 		extract($options);
 		if (!$foreign_key)
 			$foreign_key = $this->_model . '_id';
@@ -208,11 +208,17 @@ abstract class HeliumRecord extends HeliumRecordSupport {
 
 	final private function _map_one_to_one_association($association_id, $options) {
 		extract($options);
+		var_dump($options);
 
-		if ($_type == 'has_one')
+		// check the foreign key. if it's null, 0, or '', don't bother finding.
+		if ($_type == 'has_one') {
+			if (!$this->id) return;
 			$conditions[$foreign_key] = $this->id;
-		else
+		}
+		else {
+			if (!$this->$foreign_key) return;
 			$conditions['id'] = $this->$foreign_key;
+		}
 
 		$return = $class_name::find($conditions);
 		$return->_associate = $this;
@@ -350,7 +356,7 @@ abstract class HeliumRecord extends HeliumRecordSupport {
 		if (!$query)
 			return false;
 
-		$this->exists = true;
+		$this->_exists = true;
 
 		$this->after_save();
 
@@ -441,6 +447,9 @@ abstract class HeliumRecord extends HeliumRecordSupport {
 	}
 
 	public function associate($associate, $match_association_id = '') {
+		if (!$associate)
+			return;
+
 		$associate_class = get_class($associate);
 
 		foreach ($this->_associations as $type => $associations) {
