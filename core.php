@@ -178,7 +178,12 @@ final class Helium {
 				}
 		}
 
-		return $success;
+		if ($success)
+			return true;
+		elseif ($extend_search)
+			throw new HeliumException(HeliumException::no_class, $class_name);
+		else
+			return false;
 	}
 
 	// Generate an instance of an app class and throw an appropriate exception if it is not found.
