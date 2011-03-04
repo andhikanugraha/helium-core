@@ -112,11 +112,13 @@ class HeliumRouter {
 			$this->backroutes[$controller] = array();
 		if (!is_array($this->backroutes[$controller][$action]))
 			$this->backroutes[$controller][$action] = array();
+		if (!is_array($this->backroutes[$controller][$action][$serialized_pure_params]))
+			$this->backroutes[$controller][$action][$serialized_pure_params] = array();
 
 		// if controller is blank, let it be ''.
 		// if action is blank, let it be ''.
 		// if there are no other parameters, let $serialized_pure_params be ''.
-		$this->backroutes[$controller][$action][$serialized_pure_params] = $path;
+		$this->backroutes[$controller][$action][$serialized_pure_params][] = $path;
 	}
 
 	public function build_path($params = array()) {
@@ -129,18 +131,18 @@ class HeliumRouter {
 		unset($pure_params['controller'], $pure_params['action']);
 		$serialized_pure_params = serialize($pure_params);
 
-		$backroute = $this->backroutes[$controller][$action][$serialized_pure_params];
-		if (!$backroute)
-			$backroute = $this->backroutes[$controller][$action]['']; // default action backroute
-		if (!$backroute)
-			$backroute = $this->backroutes[$controller]['']; // default controller backroute
-		if (!$backroute)
-			$backroute = $this->backroutes['']; // default global backroute
+		$backroutes = $this->backroutes[$controller][$action][$serialized_pure_params];
+		if (!$backroutes)
+			$backroutes = $this->backroutes[$controller][$action]['']; // default action backroute
+		if (!$backroutes)
+			$backroutes = $this->backroutes[$controller]['']['']; // default controller backroute
+		if (!$backroutes)
+			$backroutes = $this->backroutes['']['']['']; // default global backroute
 
-		if ($backroute) {
+		foreach ($backroutes as $backroute) {
 			$search = array();
 			$replace = array();
-			foreach ($pure_params as $param => $value) {
+			foreach ($params as $param => $value) {
 				if (strpos($backroute, $param) >= 0) {
 					$search[] = $this->param_prefix . $param . $this->param_suffix;
 					$replace[] = $value;
@@ -150,10 +152,16 @@ class HeliumRouter {
 
 			$built_path = str_replace($search, $replace, $backroute);
 			
+			if (strpos($built_path, $this->param_prefix) > 0) {
+				continue;
+			}
+			
 			// put the unrouteped params into the query string portion
 			$query_string = http_build_query($pure_params);
+			if ($query_string)
+				$built_path .= '?' . $query_string;
 
-			return $built_path . '?' . $query_string;
+			return $built_path;
 		}
 	}
 
