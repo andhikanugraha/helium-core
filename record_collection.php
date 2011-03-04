@@ -213,6 +213,9 @@ class HeliumRecordCollection extends HeliumRecordSupport implements Iterator {
 			$this->batch_length = $bl;
 		}
 
+		if (!$this->count)
+			return false;
+
 		$this->rewind();
 
 		return $this->current();

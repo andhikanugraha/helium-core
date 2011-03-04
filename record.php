@@ -208,7 +208,6 @@ abstract class HeliumRecord extends HeliumRecordSupport {
 
 	final private function _map_one_to_one_association($association_id, $options) {
 		extract($options);
-		var_dump($options);
 
 		// check the foreign key. if it's null, 0, or '', don't bother finding.
 		if ($_type == 'has_one') {
