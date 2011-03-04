@@ -92,7 +92,7 @@ final class HeliumDB {
 				$this->insert_id = $mysqli->insert_id;
 			}
 			// Return number of rows affected
-			$return_val = $mysqli->rows_affected;
+			$return_val = $this->rows_affected;
 
 		}
 		else { // it was a SELECT query
