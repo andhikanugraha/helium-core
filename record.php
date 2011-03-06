@@ -208,7 +208,6 @@ abstract class HeliumRecord extends HeliumRecordSupport {
 
 	final private function _map_one_to_one_association($association_id, $options) {
 		extract($options);
-
 		// check the foreign key. if it's null, 0, or '', don't bother finding.
 		if ($_type == 'has_one') {
 			if (!$this->id) return;
@@ -263,19 +262,17 @@ abstract class HeliumRecord extends HeliumRecordSupport {
 
 	final public function __get($association_id) {
 		if ($options = $this->_associations['one-to-one'][$association_id]) {
-			$this->_map_one_to_one_association($association_id, $options);
-			return $this->$association_id;
+			return $this->_map_one_to_one_association($association_id, $options);
 		}
 		else if ($options = $this->_associations['one-to-many'][$association_id]) {
-			$this->_map_one_to_many_association($association_id, $options);
-			return $this->$association_id;
+			return $this->_map_one_to_many_association($association_id, $options);
 		}
 		else if ($options = $this->_associations['many-to-many'][$association_id]) {
-			$this->_map_many_to_many_association($association_id, $options);
-			return $this->$association_id;
+			return $this->_map_many_to_many_association($association_id, $options);
 		}
-		else
+		else {
 			return null;
+		}
 	}
 
 	final public function __set($association_id, $value) {

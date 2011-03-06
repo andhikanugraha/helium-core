@@ -53,7 +53,7 @@ class HeliumRecordCollection extends HeliumRecordSupport implements Iterator {
 		$this->class_name = $class_name;
 		$this->model_name = Inflector::underscore($class_name);
 
-		$this->table_name = $this->get_model_table($this->model_name);
+		$this->table_name = $this->get_model_table($class_name);
 
 		$prototype = new $class_name;
 		$this->one_to_one_associations = $prototype->_associations['one-to-one'];
