@@ -81,7 +81,7 @@ class HeliumRecordCollection extends HeliumRecordSupport implements Iterator {
 		}
 	}
 	
-	public function include_association($association_id, $elements = true) {
+	public function include_association($association_id) {
 		if ($this->included_associations[$association_id])
 			return;
 
