@@ -11,6 +11,9 @@ define('HELIUM_APP_PATH', HELIUM_PARENT_PATH . '/app');
 // Helium core
 require_once HELIUM_PATH . '/core.php';
 
+// Exceptions
+require_once HELIUM_PATH . '/exception.php';
+
 // Autoload
 require_once HELIUM_PATH . '/autoload.php';
 

@@ -118,10 +118,9 @@ abstract class HeliumController implements ArrayAccess {
 			if (is_array($callback))
 				$name = $callback[1];
 		}
-
 		$this->$name = function() use ($callback) {
 			$args = func_get_args();
-			call_user_func_args($callback, $args);
+			call_user_func_array($callback, $args);
 		};
 	}
 

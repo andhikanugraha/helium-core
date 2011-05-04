@@ -13,6 +13,8 @@ final class Helium {
 	const version = '0.3b';
 	const build = 'helium';
 
+	public static $autoload = true;
+
 	// debug variables
 	public static $production = false; // set to false to print out debug info on exceptions
 	public static $output = true; // set to false to disable output -- currently not implemented, actually.
@@ -178,7 +180,13 @@ final class Helium {
 				}
 		}
 
-		return $success;
+		if ($success)
+			return true;
+		elseif ($extend_search)
+			return false;
+			// throw new HeliumException(HeliumException::no_class, $class_name);
+		else
+			return false;
 	}
 
 	// Generate an instance of an app class and throw an appropriate exception if it is not found.
