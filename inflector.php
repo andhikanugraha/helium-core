@@ -1,117 +1,154 @@
 <?php
 
 class Inflector {
-    public static $plurals = array();
-    protected static $singulars = array();
-    protected static $uncountables = array();
+	public static $plurals = array();
+	protected static $singulars = array();
+	protected static $uncountables = array();
 
-    public static function plural($pattern, $replace) {
-        self::$plurals[$pattern] = $replace;
-    }
+	// Cache variables to increase performance
+	private static $plural_cache = array();
+	private static $singular_cache = array();
+	private static $camelized_cache = array();
+	private static $underscore_cache = array();
 
-    public static function singular($pattern, $replace) {
-        self::$singulars[$pattern] = $replace;
-    }
+	public static function plural($pattern, $replace) {
+		self::$plurals[$pattern] = $replace;
+	}
 
-    public static function irregular($singular, $plural) {
-        self::plural('/' . $singular . '/', $plural);
-        self::singular('/' . $plural . '/', $singular);
-    }
+	public static function singular($pattern, $replace) {
+		self::$singulars[$pattern] = $replace;
+	}
 
-    public static function uncountable($list) {
-        $list = explode(' ', $list);
-        foreach ($list as $word) {
-            self::plural('/' . $word . '/', $word);
-            self::singular('/' . $word . '/', $word);
-            self::$uncountables[] = $word;
-        }
-    }
+	public static function irregular($singular, $plural) {
+		self::plural('/' . $singular . '/', $plural);
+		self::singular('/' . $plural . '/', $singular);
+	}
 
-    public static function pluralize($singular) {
-        if (in_array($singular, self::$uncountables))
-            return $singular;
+	public static function uncountable($list) {
+		$list = explode(' ', $list);
+		foreach ($list as $word) {
+			self::plural('/' . $word . '/', $word);
+			self::singular('/' . $word . '/', $word);
+			self::$uncountables[] = $word;
+		}
+	}
 
-        foreach (array_reverse(self::$plurals) as $p => $r) {
-            $plural = preg_replace($p, $r, $singular);
-            if ($plural != $singular)
-                return $plural;
-        }
-    }
+	public static function pluralize($singular) {
+		if (self::$plural_cache[$singular])
+			return self::$plural_cache[$singular];
 
-    public static function singularize($plural) {
-        if (in_array($plural, self::$uncountables))
-            return $plural;
+		if (in_array($singular, self::$uncountables))
+			return $singular;
 
-        foreach (array_reverse(self::$singulars) as $p => $r) {
-            $singular = preg_replace($p, $r, $plural);
-            if ($singular != $plural)
-                return $singular;
-        }
-    }
+		foreach (array_reverse(self::$plurals) as $p => $r) {
+			$plural = preg_replace($p, $r, $singular);
+			if ($plural != $singular) {
+				self::$plural_cache[$singular] = $plural;
 
-    public static function camelize($lower_case_and_underscored_word, $first_letter_in_uppercase = true) {
-        $boom = explode('_', strtolower($lower_case_and_underscored_word));
-        $return = '';
+				return $plural;
+			}
+		}
+	}
 
-        if (!$first_letter_in_uppercase)
-            $return = array_shift($boom);
+	public static function singularize($plural) {
+		if (self::$singular_cache[$plural])
+			return self::$singular_cache[$plural];
 
-        foreach ($boom as $word) {
-            $word{0} = strtoupper($word{0});
-            $return .= $word;
-        }
+		if (in_array($plural, self::$uncountables))
+			return $plural;
+
+		foreach (array_reverse(self::$singulars) as $p => $r) {
+			$singular = preg_replace($p, $r, $plural);
+			if ($singular != $plural) {
+				self::$singular_cache[$plural] = $singular;
+
+				return $singular;
+			}
+		}
+	}
+
+	public static function camelize($lower_case_and_underscored_word, $first_letter_in_uppercase = true) {
+		if (self::$camelized_cache[$lower_case_and_underscored_word]) {
+			$return = self::$camelized_cache[$lower_case_and_underscored_word];
+
+			if (!$first_letter_in_uppercase)
+				$return{0} = strtolower($return{0});
+
+			return $return;
+		}
+
+		$boom = explode('_', strtolower($lower_case_and_underscored_word));
+		$return = '';
+
+		if (!$first_letter_in_uppercase)
+			$return = array_shift($boom);
+
+		foreach ($boom as $word) {
+			$word{0} = strtoupper($word{0});
+			$return .= $word;
+		}
+
+		self::$camelized_cache[$lower_case_and_underscored_word] = $return;
+		if (!$first_letter_in_uppercase)
+			self::$camelized_cache[$lower_case_and_underscored_word]{0} = strtoupper($return{0});
+		
+		return $return;
+	}
+
+	public static function underscore($camel_cased_word) {
+		if (self::$underscore_cache[$camel_cased_word])
+			return self::$underscore_cache[$camel_cased_word];
+
+		$return = preg_replace(array("/([A-Z]+)([A-Z][a-z])/", "/([a-z\d])([A-Z])/"), '\1_\2', $camel_cased_word);
+		$return = str_replace('-', '_', $return);
+		$return = strtolower($return);
+
+		self::$underscore_cache[$camel_cased_word] = $return;
 
 		return $return;
-    }
+	}
 
-    public static function underscore($camel_cased_word) {
-        $return = preg_replace(array("/([A-Z]+)([A-Z][a-z])/", "/([a-z\d])([A-Z])/"), '\1_\2', $camel_cased_word);
-        $return = str_replace('-', '_', $return);
-        $return = strtolower($return);
-        return $return;
-    }
+	public static function dasherize($underscored_word) {
+		return str_replace('_', '-', $underscored_word);
+	}
 
-    public static function dasherize($underscored_word) {
-        return str_replace('_', '-', $underscored_word);
-    }
+	public static function humanize($lower_case_and_underscored_word) {
+		return preg_replace(array("/_id$/", "/_/"), array('', ' '), $lower_case_and_underscored_word);
+	}
 
-    public static function humanize($lower_case_and_underscored_word) {
-        return preg_replace(array("/_id$/", "/_/"), array('', ' '), $lower_case_and_underscored_word);
-    }
+	public static function tableize($class_name) {
+		return self::pluralize(self::underscore($class_name));
+	}
 
-    public static function tableize($class_name) {
-        return self::pluralize(self::underscore($class_name));
-    }
+	public static function classify($table_name) {
+		return self::camelize(self::singularize(preg_replace("/.*\./", '', $table_name)));
+	}
 
-    public static function classify($table_name) {
-        return self::camelize(self::singularize(preg_replace("/.*\./", '', $table_name)));
-    }
+	public static function ordinalize($number) {
+		$digits = (string) $number;
+		$int = (int) $number;
 
-    public static function ordinalize($number) {
-        $digits = (string) $number;
-        $int = (int) $number;
+		if ($int > 11 && $int < 13)
+			$suffix = 'th';
+		else {
+			$last = $digits{strlen($digits) - 1};
+			switch ($last) {
+			case 1:
+				$suffix = 'st';
+				break;
+			case 2:
+				$suffix = 'nd';
+				break;
+			case 3:
+				$suffix = 'rd';
+				break;
+			default:
+				$suffix = 'th';
+			}
+		}
 
-        if ($int > 11 && $int < 13)
-            $suffix = 'th';
-        else {
-            $last = $digits{strlen($digits) - 1};
-            switch ($last) {
-            case 1:
-                $suffix = 'st';
-                break;
-            case 2:
-                $suffix = 'nd';
-                break;
-            case 3:
-                $suffix = 'rd';
-                break;
-            default:
-                $suffix = 'th';
-            }
-        }
-
-        return $digits . $suffix;
-    }
+		return $digits . $suffix;
+	}
 }
 
 Inflector::plural("/$/", 's');
