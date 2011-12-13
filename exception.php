@@ -207,7 +207,12 @@ class HeliumException extends Exception {
 		$title = $this->title;
 		$db_query = $this->db_query;
 		$production = Helium::conf('production');
-		require 'debugger/debugger.php';
+		if (is_string($production) && file_exists(HELIUM_APP_PATH . '/views' . $production))
+			require HELIUM_APP_PATH . '/views' . $production;
+		elseif (file_exists(HELIUM_APP_PATH . '/views/_helium/exception.php'))
+			require HELIUM_APP_PATH . '/views/_helium/exception.php';
+		else
+			require 'debugger/debugger.php';
 		exit;
 	}
 
