@@ -4,6 +4,8 @@
 // original code from ezSQL by Justin Vincent
 // with a lot of modifications to use mysqli
 // Helium::db();
+// Adopted prepare()
+// Adopted transaction support
 
 define('OBJECT', 'OBJECT', true);
 define('ARRAY_A', 'ARRAY_A', true);
@@ -253,4 +255,42 @@ final class HeliumDB {
 
 	}
 
+	/**********************************************************************
+	*  Query preparation, similar to wpdb
+	*/
+
+	public function prepare() {
+		$args = func_get_args();
+		for ($i = 1; $i < func_num_args(); ++$i) {
+			$args[$i] = $this->escape($args[$i]);
+		}
+		
+		return call_user_func_array('sprintf', $args);
+	}
+
+	/**********************************************************************
+	*  Transaction support
+	*/
+	
+	public function autocommit($mode) {
+		if (!$this->mysqli)
+			$this->connect();
+		
+		$this->mysqli->autocommit($mode);
+	}
+	
+	public function commit() {
+		if (!$this->mysqli)
+			$this->connect();
+
+		return $this->mysqli->commit();
+	}
+	
+	public function rollback() {
+		echo 'rollback';
+		if (!$this->mysqli)
+			$this->connect();
+
+		return $this->mysqli->rollback();
+	}
 }
