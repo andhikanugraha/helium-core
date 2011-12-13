@@ -7,20 +7,18 @@
 // internal methods and properties are to be prefixed with an underscore,
 // and must be defined as either private or protected.
 
-// share the variable scope of association variables
-abstract class HeliumRecordSupport {
+abstract class HeliumRecord {
 
-	protected $_associations = array('one-to-one' => array(),
+	public $id = 0;
+
+	// Associations
+	public $_associations = array(	'one-to-one' => array(),
 									'one-to-many' => array(),
 									'many-to-many' => array());
 
-	protected $_table_name = '';
-	protected $_associate = ''; // the object that is associated to this one.
-}
-
-abstract class HeliumRecord extends HeliumRecordSupport {
-
-	public $id = 0;
+	// The table name and associate
+	public $_table_name = '';
+	public $_associate = ''; // the object that is associated to this one.
 
 	// true if the record exists in the database.
 	public $_exists = false;
@@ -113,7 +111,7 @@ abstract class HeliumRecord extends HeliumRecordSupport {
 
 	// called at the beginning of save()
 	public function before_save() {}
-	
+
 	// called at the end of save()
 	// defaults to calling rebuild()
 	public function after_save() {
@@ -126,7 +124,7 @@ abstract class HeliumRecord extends HeliumRecordSupport {
 	/* finding functions
 	   functions for and related to fetching records from the DB */
 
-	final public static function find($conditions = null) {
+	public static function find($conditions = null) {
 		if (is_numeric($conditions)) { // we're looking for a single record with an ID.
 			$multiple = self::find(array('id' => $conditions));
 			return $multiple->first();
@@ -145,7 +143,7 @@ abstract class HeliumRecord extends HeliumRecordSupport {
 
 	// associational functions
 
-	final protected function has_one($association_id, $options = array()) {
+	protected function has_one($association_id, $options = array()) {
 		extract($options);
 		if (!$foreign_key)
 			$foreign_key = $this->_model . '_id';
@@ -158,7 +156,7 @@ abstract class HeliumRecord extends HeliumRecordSupport {
 		$this->_associations['one-to-one'][$association_id] = compact('_type', 'foreign_key', 'class_name', 'conditions');
 	}
 
-	final protected function belongs_to($association_id, $options = array()) {
+	protected function belongs_to($association_id, $options = array()) {
 		extract($options);
 		if (!$foreign_key)
 			$foreign_key = $association_id . '_id';
@@ -171,7 +169,7 @@ abstract class HeliumRecord extends HeliumRecordSupport {
 		$this->_associations['one-to-one'][$association_id] = compact('_type', 'foreign_key', 'class_name', 'conditions');
 	}
 
-	final protected function has_many($association_id, $options) {
+	protected function has_many($association_id, $options) {
 		extract($options);
 		if (!$foreign_key)
 			$foreign_key = $this->_model . '_id';
@@ -184,7 +182,7 @@ abstract class HeliumRecord extends HeliumRecordSupport {
 	}
 
 	// the other class must also declare has_and_belongs_to_many
-	final protected function has_and_belongs_to_many($association_id, $options) {
+	protected function has_and_belongs_to_many($association_id, $options) {
 		extract($options);
 
 		if (!$class_name)
@@ -206,7 +204,7 @@ abstract class HeliumRecord extends HeliumRecordSupport {
 
 	// internal mapping functions for associations
 
-	final private function _map_one_to_one_association($association_id, $options) {
+	private function _map_one_to_one_association($association_id, $options) {
 		extract($options);
 		// check the foreign key. if it's null, 0, or '', don't bother finding.
 		if ($_type == 'has_one') {
@@ -228,7 +226,7 @@ abstract class HeliumRecord extends HeliumRecordSupport {
 		return $return;
 	}
 
-	final private function _map_one_to_many_association($association_id, $options) {
+	private function _map_one_to_many_association($association_id, $options) {
 		extract($options);
 		
 		$return = array();
@@ -242,7 +240,7 @@ abstract class HeliumRecord extends HeliumRecordSupport {
 		return $return;
 	}
 
-	final protected function _map_many_to_many_association($association_id, $options) {
+	protected function _map_many_to_many_association($association_id, $options) {
 		if (!$this->id === null)
 			return;
 
@@ -261,7 +259,7 @@ abstract class HeliumRecord extends HeliumRecordSupport {
 
 	// overloading for association support
 
-	final public function __get($association_id) {
+	public function __get($association_id) {
 		if ($options = $this->_associations['one-to-one'][$association_id]) {
 			return $this->_map_one_to_one_association($association_id, $options);
 		}
@@ -276,7 +274,7 @@ abstract class HeliumRecord extends HeliumRecordSupport {
 		}
 	}
 
-	final public function __set($association_id, $value) {
+	public function __set($association_id, $value) {
 		if ($this->_associations['one-to-one'][$association_id] ||
 			$this->_associations['one-to-many'][$association_id] ||
 			$this->_associations['many-to-many'][$association_id])
@@ -292,7 +290,7 @@ abstract class HeliumRecord extends HeliumRecordSupport {
 			$this->$association_id = $value;
 	}
 
-	final public function __isset($name) {
+	public function __isset($name) {
 		return ($this->_associations['one-to-one'][$name] || 
 				$this->_associations['one-to-many'][$name] ||
 				$this->_associations['many-to-many'][$name]);
@@ -383,11 +381,11 @@ abstract class HeliumRecord extends HeliumRecordSupport {
 
 	// under-the-hood database functions
 
-	final public function _columns() {
+	public function _columns() {
 		return array_keys($this->_column_types);
 	}
 
-	private function _db_values() {
+	protected function _db_values() {
 		$db = Helium::db();
 		$fields = array();
 

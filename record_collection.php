@@ -11,7 +11,7 @@
 // and switching batches can also be done.
 // (think of it like pages in a blog, each containing posts)
 
-class HeliumRecordCollection extends HeliumRecordSupport implements Iterator {
+class HeliumRecordCollection implements Iterator {
 
 	const all_records = null;
 
@@ -410,7 +410,7 @@ class HeliumRecordCollection extends HeliumRecordSupport implements Iterator {
 		return $record;
 	}
 
-	private function prepare_value($value, $type) {
+	public static function prepare_value($value, $type) {
 		switch ($type) {
 			case 'bool':
 				$value = (bool) $value;
