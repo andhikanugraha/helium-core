@@ -86,7 +86,7 @@ final class HeliumDB {
 		if ($mysqli->error)
 			throw new HeliumException(HeliumException::db_error, $mysqli->error);
 
-		if ( preg_match( "/^\\s*(insert|delete|update|replace|alter) /i", $query ) ) {
+		if ( preg_match( "/^\\s*(insert|delete|update|replace|alter|truncate) /i", $query ) ) {
 			$this->rows_affected = $mysqli->affected_rows;
 
 			// Take note of the insert_id

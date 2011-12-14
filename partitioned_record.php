@@ -251,8 +251,10 @@ abstract class HeliumPartitionedRecord extends HeliumRecord {
 			else {
 				$this->_insert();
 				
-				foreach ($this->_vertical_partition_column_map as $tab) {
-					$this->_insert($tab);
+				if ($this->_is_vertically_partitioned) {
+					foreach ($this->_vertical_partitions as $tab) {
+						$this->_insert($tab);
+					}
 				}
 			}
 
@@ -348,8 +350,10 @@ abstract class HeliumPartitionedRecord extends HeliumRecord {
 		$db = Helium::db();
 
 		$fields = $values = array();
-		foreach ($this->_db_values($table) as $field => $value) {
-			if (!$this->$field || $field == 'created_at' || $field == 'updated_at')
+		foreach ($this->_db_values($table) as $field => $value) {	
+			if ($field == $this->_vertical_partition_foreign_key)
+				$value = $this->id;
+			elseif (!$this->$field || $field == 'created_at' || $field == 'updated_at')
 				continue;
 
 			$fields[] = "`$field`";
@@ -368,7 +372,8 @@ abstract class HeliumPartitionedRecord extends HeliumRecord {
 
 		$query = $db->query($query);
 
-		$this->id = $db->insert_id;
+		if ($table == $this->_table_name)
+			$this->id = $db->insert_id;
 
 		$this->_exists = true;
 	}
