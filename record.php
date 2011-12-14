@@ -172,7 +172,7 @@ abstract class HeliumRecord {
 		$this->_associations['one-to-one'][$association_id] = compact('_type', 'foreign_key', 'class_name', 'conditions');
 	}
 
-	protected function has_many($association_id, $options) {
+	protected function has_many($association_id, $options = array()) {
 		extract($options);
 		if (!$foreign_key)
 			$foreign_key = $this->_model . '_id';
@@ -185,7 +185,7 @@ abstract class HeliumRecord {
 	}
 
 	// the other class must also declare has_and_belongs_to_many
-	protected function has_and_belongs_to_many($association_id, $options) {
+	protected function has_and_belongs_to_many($association_id, $options = array()) {
 		extract($options);
 
 		if (!$class_name)
