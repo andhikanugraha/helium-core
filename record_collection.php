@@ -179,14 +179,17 @@ class HeliumRecordCollection implements Iterator {
 			$name = $col->name;
 			$type = $col->type;
 			switch ($type) {
-				case MYSQLI_TYPE_TINY:
-					if ($length == 1)
-						$type = 'bool';
+				case MYSQLI_TYPE_BIT:
+					$type = 'bool';
+					break;
 				case MYSQLI_TYPE_SHORT:
 				case MYSQLI_TYPE_LONG:
 				case MYSQLI_TYPE_LONGLONG:
 				case MYSQLI_TYPE_INT24:
 					$type = 'int';
+				case MYSQLI_TYPE_TINY:
+					if ($length == 1)
+						$type = 'bool';
 					break;
 				case MYSQLI_TYPE_FLOAT:
 				case MYSQLI_TYPE_DOUBLE:

@@ -60,14 +60,17 @@ abstract class HeliumRecord {
 				
 				$type = strtolower($type);
 				switch ($type) {
-					case 'tinyint':
-						if ($length == 1)
-							$type = 'bool';
+					case 'bit':
+						$type = 'bool';
+						break;
 					case 'smallint':
 					case 'int':
 					case 'mediumint':
 					case 'bigint':
 						$type = 'int';
+					case 'tinyint':
+						if ($length == 1)
+							$type = 'bool';
 						break;
 					case 'float':
 					case 'double':
