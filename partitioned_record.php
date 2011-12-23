@@ -109,9 +109,14 @@ abstract class HeliumPartitionedRecord extends HeliumRecord {
 			
 			$type = strtolower($type);
 			switch ($type) {
+				case 'bit':
+					$type = 'bool';
+					break;
 				case 'tinyint':
-					if ($length == 1)
+					if ($length == 1) {
 						$type = 'bool';
+						break;
+					}
 				case 'smallint':
 				case 'int':
 				case 'mediumint':
@@ -148,7 +153,6 @@ abstract class HeliumPartitionedRecord extends HeliumRecord {
 	// association definitions (has_many, etc) go here
 	// everything else that should be called during __construction should also be called here.
 	public function init() {}
-
 	public function defaults() {}
 
 	// rebuild, called:
@@ -157,7 +161,6 @@ abstract class HeliumPartitionedRecord extends HeliumRecord {
 	public function rebuild() {}
 
 	// called at the beginning of save()
-	public function before_save() {}
 
 	// called at the end of save()
 	// defaults to calling rebuild()
