@@ -422,6 +422,24 @@ class HeliumRecordCollection implements Iterator {
 		return $value;
 	}
 
+	public function delete_all() {
+		if ($this->count_all && $this->fetched)
+			return $this->count_all;
+
+		$db = Helium::db();
+
+		// make the query
+		$base_query = 'DELETE FROM `%s`%s WHERE %s';
+
+		$join_clause = implode('', $this->join_statements);
+
+		$query = sprintf($base_query, $this->table_name, $join_clause, $this->conditions_string);
+
+		$count = $db->get_var($query);
+
+		return $count;
+	}
+
 	// iterator methods
 	// we're only using numerical indices
 	// so there's no need to use array_keys() like on php.net.
