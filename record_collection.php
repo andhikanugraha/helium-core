@@ -253,11 +253,14 @@ class HeliumRecordCollection implements Iterator {
 
 	private function escape_field($field) {
 		$field_particles = explode('.', $field);
+
 		if (count($field_partices) < 2)
 			array_unshift($field_particles, $this->table_name);
+
 		array_walk($field_particles, function(&$particle) {
 			$particle = "`$particle`";
 		});
+
 		$field = implode('.', $field_particles);
 
 		return $field;
@@ -305,19 +308,17 @@ class HeliumRecordCollection implements Iterator {
 		$this->order = strtoupper($order);
 	}
 
-	public function ascending() {
-		$this->set_order('ASC');
-	}
-
-	public function descending() {
-		$this->set_order('DESC');
-	}
-
-	public function set_order_by($field, $order = '') {
+	public function set_order_by() {
 		$this->fetched = false;
-		$this->order_by = $this->escape_field($field);
-		if ($order)
-			$this->set_order($order);
+		
+		$fields = func_get_args();
+		$escaped_fields = array();
+
+		foreach ($fields as $field) {
+			$escaped_fields[] = $this->escape_field($field);
+		}
+
+		$this->order_by = implode(', ', $escaped_fields);
 	}
 
 	public function count() {
@@ -344,6 +345,7 @@ class HeliumRecordCollection implements Iterator {
 		return $count;
 	}
 	
+
 	public function get_number_of_batches() {
 		if (!$this->batch_length)
 			return 1;
