@@ -427,7 +427,8 @@ abstract class HeliumRecord {
 	public function _unserialize_auto() {
 		$obj = $this;
 		array_walk($this->_auto_serialize, function($property) use ($obj) {
-			$obj->$property = unserialize($obj->$property);
+			if (is_string($obj->$property))
+				$obj->$property = unserialize($obj->$property);
 		});
 	}
 
