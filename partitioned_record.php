@@ -142,53 +142,8 @@ abstract class HeliumPartitionedRecord extends HeliumRecord {
 
 			$columns[$field] = $type;
 		}
-		
+
 		return $columns;
-	}
-
-	/* blank methods
-	   functions that can be redefined by child functions */
-
-	// init function
-	// association definitions (has_many, etc) go here
-	// everything else that should be called during __construction should also be called here.
-	public function init() {}
-	public function defaults() {}
-
-	// rebuild, called:
-	// after a record is fetched from the database
-	// after a record is saved (if after_save is not redefined)
-	public function rebuild() {}
-
-	// called at the beginning of save()
-
-	// called at the end of save()
-	// defaults to calling rebuild()
-	public function after_save() {
-		$this->rebuild();
-	}
-
-	// called before destroy().
-	public function before_destroy() {}
-
-	/* finding functions
-	   functions for and related to fetching records from the DB */
-
-	public static function find($conditions = null) {
-		if (is_numeric($conditions)) { // we're looking for a single record with an ID.
-			$multiple = self::find(array('id' => $conditions));
-			return $multiple->first();
-		}
-
-		$class_name = get_called_class();
-		$set = new HeliumRecordCollection($class_name);
-
-		if (is_array($conditions))
-			$set->set_conditions_array($conditions);
-		elseif (is_string($conditions) && $conditions != 'all')
-			$set->set_conditions_string($conditions);
-
-		return $set;
 	}
 
 	// Overloading for association AND vertical partition support
