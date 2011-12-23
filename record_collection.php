@@ -155,7 +155,7 @@ class HeliumRecordCollection implements Iterator {
 		$db = Helium::db();
 
 		// Generate and store the query
-		$this->query = $this->generate_query();
+		$query = $this->query = $this->generate_query();
 
 		// execute the query
 		$results = $db->get_results($query, ARRAY_A);
