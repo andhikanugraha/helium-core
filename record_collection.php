@@ -63,7 +63,7 @@ class HeliumRecordCollection implements Iterator {
 		$this->one_to_one_associations = $prototype->_associations['one-to-one'];
 		$this->many_to_many_associations = $prototype->_associations['many-to-many'];
 	}
-	
+
 	public function include_associations() {
 		$this->set_order_by('id');
 
@@ -80,7 +80,7 @@ class HeliumRecordCollection implements Iterator {
 			$this->join_statements[] = sprintf($base_join_statement, $join_table, $join_condition);
 		}
 	}
-	
+
 	public function include_association($association_id) {
 		if ($this->included_associations[$association_id])
 			return;
@@ -154,23 +154,9 @@ class HeliumRecordCollection implements Iterator {
 
 		$db = Helium::db();
 
-		// make the query
-		$base_query = 'SELECT `%s`.*%s FROM `%1$s`%s WHERE %s ORDER BY %s %s';
+		// Generate and store the query
+		$this->query = $this->generate_query();
 
-		$join_clause = implode('', $this->join_statements);
-		
-		$additionals = '';
-		foreach ($this->additional_columns as $col => $dec) {
-			$additionals .= ", ($dec) AS `$col`";
-		}
-
-		$query = sprintf($base_query, $this->table_name, $additionals, $join_clause, $this->conditions_string, $this->order_by, $this->order);
-
-		if ($this->batch_length > 0)
-			$query .= sprintf(' LIMIT %d,%d', $this->batch_start, $this->batch_length);
-
-		// store the query
-		$this->query = $query;
 		// execute the query
 		$results = $db->get_results($query, ARRAY_A);
 
@@ -344,7 +330,6 @@ class HeliumRecordCollection implements Iterator {
 
 		return $count;
 	}
-	
 
 	public function get_number_of_batches() {
 		if (!$this->batch_length)
@@ -436,7 +421,6 @@ class HeliumRecordCollection implements Iterator {
 
 		return $value;
 	}
-
 
 	// iterator methods
 	// we're only using numerical indices
