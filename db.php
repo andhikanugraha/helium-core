@@ -272,11 +272,14 @@ final class HeliumDB {
 	*  Transaction support
 	*/
 	
-	public function autocommit($mode) {
+	public function autocommit($mode = null) {
 		if (!$this->mysqli)
 			$this->connect();
 		
-		$this->mysqli->autocommit($mode);
+		if (func_num_args() == 0)
+			return $this->get_var('SELECT @@autocommit');
+		else
+			$this->mysqli->autocommit($mode);
 	}
 	
 	public function commit() {
@@ -287,7 +290,6 @@ final class HeliumDB {
 	}
 	
 	public function rollback() {
-		echo 'rollback';
 		if (!$this->mysqli)
 			$this->connect();
 
