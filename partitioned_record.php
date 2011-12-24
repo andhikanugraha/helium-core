@@ -182,6 +182,8 @@ abstract class HeliumPartitionedRecord extends HeliumRecord {
 	public function save() {
 		// Use MySQL transactions
 		$db = Helium::db();
+		
+		$prev_autocommit = $db->autocommit();
 
 		try {
 			$table = $this->_table_name;
@@ -222,11 +224,11 @@ abstract class HeliumPartitionedRecord extends HeliumRecord {
 
 			$this->after_save();
 
-			$db->autocommit(true);
+			$db->autocommit($prev_autocommit);
 		}
 		catch (HeliumException $e) {
 			$db->rollback();
-			$db->autocommit(true);
+			$db->autocommit($prev_autocommit);
 
 			$e->output(); exit;
 			throw new HeliumException('Saving partitioned record failed.');
@@ -343,6 +345,8 @@ abstract class HeliumPartitionedRecord extends HeliumRecord {
 		// Use MySQL transactions
 		$db = Helium::db();
 		
+		$prev_autocommit = $db->autocommit();
+		
 		try {
 			$db->autocommit(false);
 
@@ -374,7 +378,7 @@ abstract class HeliumPartitionedRecord extends HeliumRecord {
 		}
 		catch (HeliumException $e) {
 			$db->rollback();
-			$db->autocommit(true);
+			$db->autocommit($prev_autocommit);
 
 			throw new HeliumException('Deleting partitioned record failed.');
 		}
@@ -406,7 +410,7 @@ abstract class HeliumPartitionedRecord extends HeliumRecord {
 	}
 
 	// Overwrite the following function with a statically defined column map for greater performance
-	protected function map_vertical_partitions() {
+	public function map_vertical_partitions() {
 		// Fill ->_vertical_partition_column_map
 		if (!$this->_is_vertically_partitioned)
 			return;
