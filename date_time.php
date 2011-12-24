@@ -9,7 +9,8 @@
 class HeliumDateTime extends DateTime {
 	const MYSQL = 'Y-m-d H:i:s';
 	
-	public static $locales = array();
+	public static $locales = array('en' => array());
+	public static $default_locale = 'en';
 	public static $timezone = 'UTC';
 
 	public $translations = array();
@@ -21,6 +22,9 @@ class HeliumDateTime extends DateTime {
 		elseif (is_string($timezone)) {
 			$timezone = new DateTimeZone($timezone);
 		}
+
+		$this->set_locale(self::$default_locale);
+
 		parent::__construct($time, $timezone);
 	}
 
@@ -101,6 +105,10 @@ class HeliumDateTime extends DateTime {
 	public function set_locale($locale) {
 		$this->translations = self::$locales[$locale];
 	}
+	
+	public function set_default_locale($locale = 'en') {
+		self::$default_locale = $locale;
+	}
 
 	public function format($format) {
 		$original = parent::format($format);
@@ -114,5 +122,12 @@ class HeliumDateTime extends DateTime {
 			$tz = new DateTimeZone($timezone_string);
 			$this->setTimezone($tz);
 		}
+	}
+	
+	public function setTimezone($timezone) {
+		if (is_string($timezone))
+			$timezone = new DateTimeZone($timezone);
+			
+		return parent::setTimezone($timezone);
 	}
 }
