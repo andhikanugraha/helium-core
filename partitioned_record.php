@@ -149,6 +149,9 @@ abstract class HeliumPartitionedRecord extends HeliumRecord {
 	// Overloading for association AND vertical partition support
 
 	public function __get($association_id) {
+		if ($this->$association_id)
+			return $this->$association_id;
+
 		if ($this->_is_vertically_partitioned) {
 			// Overloading for vertical partition support
 			// Process: If an undefined property belongs to a vertical partition,
@@ -202,11 +205,13 @@ abstract class HeliumPartitionedRecord extends HeliumRecord {
 						if (!in_array($tab, $vertical_delta)) {
 							$current = $this->$col;
 							$original = $this->_vertical_partition_original_values[$col];
-							if ($current != $original)
-								$this->_update($tab);
+							if ($current != $original) {
+								$vertical_delta[] = $tab;
+							}
 						}
 					}
 				}
+				array_walk($vertical_delta, array($this, '_update'));
 			}
 			else {
 				$this->_insert();
@@ -279,6 +284,7 @@ abstract class HeliumPartitionedRecord extends HeliumRecord {
 	}
 
 	protected function _update($table = '') {
+		echo $table;
 		if (!$table)
 			$table = $this->_table_name;
 
@@ -448,8 +454,10 @@ abstract class HeliumPartitionedRecord extends HeliumRecord {
 			if ($select) {
 				foreach ($select as $col => $value) {
 					$col_type = $this->_vertical_partition_column_types[$col];
-					$this->_vertical_partition_original_values[$col] = 
-					$this->$col = HeliumRecordCollection::prepare_value($value, $col_type);
+					$this->_vertical_partition_original_values[$col] = 	 
+						HeliumRecordCollection::prepare_value($value, $col_type);
+					if (!$this->$col)
+						$this->$col = $this->_vertical_partition_original_values[$col];
 				}
 			}
 			else {
