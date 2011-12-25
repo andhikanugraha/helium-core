@@ -97,50 +97,63 @@ abstract class HeliumPartitionedRecord extends HeliumRecord {
 
 		$query = $db->get_results("SHOW COLUMNS FROM `$table`");
 
+		// Exclude primary keys for partitions
+		$exclude = array();
+		if ($table != $this->_table_name) {
+			$exclude = $db->get_col("SHOW KEYS FROM `$table`", 4);
+			if ($exclude)
+				$exclude[] = $this->_vertical_partition_foreign_key;
+			else
+				$exclude = array($this->_vertical_partition_foreign_key);
+		}
+
 		$columns = array();
 
 		foreach ($query as $row) {
 			$field = $row->Field;
 			$type = $row->Type;
 
-			$pos = strpos($type, '(');
-			if ($pos > 0)
-				$type = substr($type, 0, $pos);
+			if (!in_array($field, $exclude)) {
+
+				$pos = strpos($type, '(');
+				if ($pos > 0)
+					$type = substr($type, 0, $pos);
 			
-			$type = strtolower($type);
-			switch ($type) {
-				case 'bit':
-					$type = 'bool';
-					break;
-				case 'tinyint':
-					if ($length == 1) {
+				$type = strtolower($type);
+				switch ($type) {
+					case 'bit':
 						$type = 'bool';
 						break;
-					}
-				case 'smallint':
-				case 'int':
-				case 'mediumint':
-				case 'bigint':
-					$type = 'int';
-					break;
-				case 'float':
-				case 'double':
-				case 'decimal':
-					$type = 'float';
-					break;
-				case 'date':
-				case 'time':
-				case 'datetime':
-				case 'timestamp':
-				case 'year':
-					$type = 'datetime';
-					break;
-				// to do: support the other column types (BLOB, etc)
-				default:
-					$type = 'string';
-			}
+					case 'tinyint':
+						if ($length == 1) {
+							$type = 'bool';
+							break;
+						}
+					case 'smallint':
+					case 'int':
+					case 'mediumint':
+					case 'bigint':
+						$type = 'int';
+						break;
+					case 'float':
+					case 'double':
+					case 'decimal':
+						$type = 'float';
+						break;
+					case 'date':
+					case 'time':
+					case 'datetime':
+					case 'timestamp':
+					case 'year':
+						$type = 'datetime';
+						break;
+					// to do: support the other column types (BLOB, etc)
+					default:
+						$type = 'string';
+				}
 
-			$columns[$field] = $type;
+				$columns[$field] = $type;
+			}
 		}
 
 		return $columns;
@@ -284,7 +297,6 @@ abstract class HeliumPartitionedRecord extends HeliumRecord {
 	}
 
 	protected function _update($table = '') {
-		echo $table;
 		if (!$table)
 			$table = $this->_table_name;
 
@@ -316,10 +328,14 @@ abstract class HeliumPartitionedRecord extends HeliumRecord {
 		$db = Helium::db();
 
 		$fields = $values = array();
-		foreach ($this->_db_values($table) as $field => $value) {	
-			if ($field == $this->_vertical_partition_foreign_key)
-				$value = $this->id;
-			elseif (!$this->$field || $field == 'created_at' || $field == 'updated_at')
+		$pairs = $this->_db_values($table);
+
+		if ($table != $this->_table_name)
+			$pairs[$this->_vertical_partition_foreign_key] = $this->id;
+
+		foreach ($pairs as $field => $value) {
+			if ($field != $this->_vertical_partition_foreign_key &&
+				(!$this->$field || $field == 'created_at' || $field == 'updated_at'))
 				continue;
 
 			$fields[] = "`$field`";
