@@ -224,11 +224,18 @@ abstract class HeliumRecord {
 		$return = $class_name::find($conditions);
 		$return->set_order('DESC');
 		$return = $return->first();
-		$return->_associate = $this;
+		if ($return) {
+			$return->_associate = $this;
 
-		$this->$association_id = $return;
+			$this->$association_id = $return;
 
-		return $return;
+			return $return;
+		}
+		else {
+			$this->$association_id = null;
+			
+			return null;
+		}
 	}
 
 	private function _map_one_to_many_association($association_id, $options) {
