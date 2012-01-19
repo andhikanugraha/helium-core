@@ -8,10 +8,14 @@
 
 class HeliumDateTime extends DateTime {
 	const MYSQL = 'Y-m-d H:i:s';
+	const zero_date = '0000-00-00';
+	const zero_datetime = '0000-00-00 00:00:00';
 	
 	public static $locales = array('en' => array());
 	public static $default_locale = 'en';
 	public static $timezone = 'UTC';
+	
+	private $zero = false;
 
 	public $translations = array();
 
@@ -24,12 +28,40 @@ class HeliumDateTime extends DateTime {
 		}
 
 		$this->set_locale(self::$default_locale);
+		
+		if ($time == self::zero_date || $time == self::zero_datetime)
+			$this->zero = true;
 
 		parent::__construct($time, $timezone);
 	}
+	
+	public function setDate($year, $month, $day) {
+		if ($this->zero && $month && $day)
+			$this->zero = false;
+
+		parent::setDate($year, $month, $day);
+	}
+	
+	public function setISODate($year, $week, $day = 1) {
+		if ($this->zero && $week && $day)
+			$this->zero = false;
+
+		parent::setISODate($year, $month, $day);
+	}
+	
+	public function setTimestamp($unixtimestamp) {
+		if ($this->zero)
+			$this->zero = false;
+
+		parent::setTimestamp($unixtimestamp);
+	}
 
 	public function mysql_datetime() {
-		return parent::format(self::MYSQL);
+		if ($this->zero)
+			return self::zero;
+		else
+			// Using parent:: would be faster
+			return parent::format(self::MYSQL);
 	}
 
 	public function __toString() {
@@ -111,16 +143,12 @@ class HeliumDateTime extends DateTime {
 	}
 
 	public function format($format) {
-		$day = parent::format('d');
-		$month = parent::format('m');
-		// Days or months cannot be 0
-		// If they are, this means we're represting an invalid date
-		if (!$day || !$month)
-			return '';
-		else {
+		if (!$this->zero) {
 			$original = parent::format($format);
 			return str_replace(array_keys($this->translations), array_values($this->translations), $original);
 		}
+		else
+			return '';
 	}
 
 	public static function set_default_timezone($timezone_string) {
