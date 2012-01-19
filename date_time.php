@@ -29,7 +29,7 @@ class HeliumDateTime extends DateTime {
 	}
 
 	public function mysql_datetime() {
-		return $this->format(self::MYSQL);
+		return parent::format(self::MYSQL);
 	}
 
 	public function __toString() {
@@ -111,8 +111,16 @@ class HeliumDateTime extends DateTime {
 	}
 
 	public function format($format) {
-		$original = parent::format($format);
-		return str_replace(array_keys($this->translations), array_values($this->translations), $original);
+		$day = parent::format('d');
+		$month = parent::format('m');
+		// Days or months cannot be 0
+		// If they are, this means we're represting an invalid date
+		if (!$day || !$month)
+			return '';
+		else {
+			$original = parent::format($format);
+			return str_replace(array_keys($this->translations), array_values($this->translations), $original);
+		}
 	}
 
 	public static function set_default_timezone($timezone_string) {
