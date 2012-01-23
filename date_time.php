@@ -58,7 +58,7 @@ class HeliumDateTime extends DateTime {
 
 	public function mysql_datetime() {
 		if ($this->zero)
-			return self::zero;
+			return self::zero_datetime;
 		else
 			// Using parent:: would be faster
 			return parent::format(self::MYSQL);
