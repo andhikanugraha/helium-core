@@ -47,6 +47,15 @@ final class HeliumDB {
 
 		return true;
 	}
+	
+	/**********************************************************************
+	*  Kill thread and close connection
+	*/
+	public function __destruct() {
+		$thread_id = $this->mysqli->thread_id;
+		$this->mysqli->kill($thread_id);
+		$this->mysqli->close();
+	}
 
 	/**********************************************************************
 	*  Format a mySQL string correctly for safe mySQL insert

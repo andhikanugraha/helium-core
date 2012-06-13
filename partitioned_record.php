@@ -100,11 +100,12 @@ abstract class HeliumPartitionedRecord extends HeliumRecord {
 		// Exclude primary keys for partitions
 		$exclude = array();
 		if ($table != $this->_table_name) {
-			$exclude = $db->get_col("SHOW KEYS FROM `$table`", 4);
-			if ($exclude)
-				$exclude[] = $this->_vertical_partition_foreign_key;
-			else
-				$exclude = array($this->_vertical_partition_foreign_key);
+			$exclude = array('id', $this->_vertical_partition_foreign_key);
+			// $exclude = $db->get_col("SHOW KEYS FROM `$table`", 4);
+			// if ($exclude)
+			// 	$exclude[] = $this->_vertical_partition_foreign_key;
+			// else
+			// 	$exclude = array($this->_vertical_partition_foreign_key);
 		}
 
 		$columns = array();
